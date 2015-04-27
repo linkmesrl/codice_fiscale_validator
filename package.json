@@ -1,0 +1,24 @@
+{
+  "name": "codice_fiscale_validator",
+  "version": "1.0.0",
+  "description": "Validazione del codice fiscale, con checksum e tolleranza a omocodie",
+  "main": "codice_fiscale.js",
+  "scripts": {
+    "test": "mocha codice_fiscale.test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/linkmesrl/codice_fiscale_validator.git"
+  },
+  "keywords": [
+    "codice",
+    "fiscale",
+    "validator"
+  ],
+  "author": "Giovanni Lela  - LinkMe s.r.l.",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/linkmesrl/codice_fiscale_validator/issues"
+  },
+  "homepage": "https://github.com/linkmesrl/codice_fiscale_validator"
+}
