@@ -10,6 +10,21 @@ Viene validato:
 
 ```javascript
     var isCf = require('codice_fiscale_validator');
-    isCf('LLEGNN86P23F205T') -> TRUE
-    isCf('LSEGNN86p23F205T') -> FALSE
+    
+    //valido
+    try{
+        isCf('LLEGNN86P23F205T'); //-> true
+    }
+    catch(err){
+        //err === null
+    }
+    
+    //non valido - spec per altra documentazione
+    try{
+        isCf('LSEGNN86p23F205T'); 
+    }
+    catch(err){
+        
+        //err instanceof Error
+    }
 ```
