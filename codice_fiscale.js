@@ -19,22 +19,24 @@ var listCtrlCode = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O',
 
 var listError = { 0 : 'Empty code', 1 : 'Len error', 2 : 'Code with wrong char', 3 : 'Code with wrong char in omocodia', 4 : 'Wrong code'};
 
-module.exports = function checkCf(codiceFiscale){
+/*
+return the error description of cf, or false if the codiceFiscale is correct
+*/
+//module.exports.isInvalidCF = function (codiceFiscale){
+
+function isInvalidCF(codiceFiscale){
 
 
     if(!codiceFiscale){
-
-        throw new Error(listError[0]);
+        return listError[0];
     }
 
     if(codiceFiscale.length !== 16){
-
-        throw new Error(listError[1]);
+        return listError[1];
     }
 
-    if(! codiceFiscale.match(REGEX_CODICEFISCALE) ){
-
-        throw new Error(listError[2]);
+    if(!codiceFiscale.match(REGEX_CODICEFISCALE)){
+        return listError[2];
     }
 
     var cfCharList = codiceFiscale.toUpperCase().split('');
@@ -45,7 +47,7 @@ module.exports = function checkCf(codiceFiscale){
 
         if ( isNaN(charAtIndex)  && listDecOmocodia[charAtIndex] ==='!'){
 
-            throw new Error(listError[3]);
+            return listError[3];
         }
     });
 
@@ -63,8 +65,106 @@ module.exports = function checkCf(codiceFiscale){
 
     if( checksum !== cfCharList[15] ){
 
-        throw new Error(listError[4]);
+        return listError[4];
     }
 
-    return true;
+    return false;
 };
+
+
+//for backward compatibility
+//it raise error on wrong codes
+//and return true on rigth one
+function checkCf(codiceFiscale)
+{
+    var r= isInvalidCF(codiceFiscale);
+
+    if( r=== false ) 
+        return true;
+
+    throw new Error( r );
+}
+
+
+
+/*
+check for identify an omocodia,
+is possible detece the progressive number identifing a fiscal code
+for each code could be one strigth fiscal code with no omocodia,
+and at maximum 128 code rimapped encoding the number in the fiscal code with string
+
+this  function return an integer, 0 mean no omocodia, 
+4 mean that this code is 4omocodic fiscal code (pointing to the straigth version)
+and so on 
+*/
+
+//module.exports.getOmocodiaProgressiveNumber = function ( sCf )
+
+function getOmocodiaProgressiveNumber( sCf )
+{
+    if( !sCf )
+        return 0
+
+    var reOmocode = /[lmnpqrstuv]/ig;
+
+    var tmp
+
+    var iOmocodia= 0;
+    var aOmocodiaPosition=[ 14,13,12,10,9,7,6 ]
+
+    /*if the cf is shorter than expected we would calculate anyway 
+    if the cf sound omocodic*/
+    var iMax=sCf.length
+    var tmp=[]
+    var i
+    for( i=0; i<aOmocodiaPosition.length; i++ )
+    {
+        if(aOmocodiaPosition[i]<iMax)
+            tmp.push( aOmocodiaPosition[i] )
+    }   
+    aOmocodiaPosition= tmp;
+
+    /*
+    There is an omocodia when a fiscal code is not unique
+    in other words there are distinct people with the the same fiscal code,
+    In computer slang we could say that when we call "omocodia" when there is a the fiscal hash collapse.
+    to solve this condition the italian tax bureau 
+    must replace the numbers with letter (from left to right).
+    Because there are 7 numbers that can be replaced with a corrispondent number
+    this is the map of the encoding  with omocodia:
+    0->L    5->R
+    1->M    6->S
+    2->N    7->T
+    3->P    8->U
+    4->Q    9->V
+
+    there could be 2^7 combination of the same fiscal code.
+    Omocodia a rare, but on average year there are ~1400 new omocodia.
+      */
+    for( var i=0; i<aOmocodiaPosition.length; i++ )
+    {       
+        //tmp= sCf[ aOmocodiaPosition[i] ]
+        //if( reOmocode.test( tmp ) )
+        if( reOmocode.test( sCf[ aOmocodiaPosition[i] ] ) )
+        {
+            iOmocodia+= Math.pow(2,i)
+        }
+    }
+
+    return iOmocodia;
+}
+
+//for backward compatibilty with node module export
+try{
+if(module)
+{
+
+module.exports.isInvalidCF = isInvalidCF
+module.exports.getOmocodiaProgressiveNumber = getOmocodiaProgressiveNumber
+module.exports.checkCf= checkCf
+}    
+}
+catch(e)
+{
+    console.log( "error",e )  
+}
