@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>angular custom directive for italian fiscale code</title>
+
+
+<script src= "codice_fiscale.js"></script>
+<script src= "https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.7/angular.min.js"></script>
+
+
+
+<script>
+var app = angular.module('app', [])
+
+
+app.service('cfService', function ()
+{
+
+    this.isInvalidCF= isInvalidCF //function(cf){ return isInvalidCF(cf) }
+    this.getOmocodiaProgressiveNumber= getOmocodiaProgressiveNumber
+    
+})
+
+
+
+
+
+app.directive('italianFiscalCode', function()
+{
+	var controller= [ '$scope','cfService' ,function ($scope,cfService)
+	{
+		function setup()
+		{
+			$scope.validate()
+		}
+
+
+		$scope.$watch('model' ,function()
+		{
+	        console.log( "watch: model" )
+			$scope.validate()
+    	});
+
+
+		$scope.validate = function ()
+		{
+	        if( cfService.isInvalidCF( $scope.model ) )
+	        	$scope.color= "red"
+	        else
+	        	$scope.color= "green"
+
+			$scope.counter= getOmocodiaProgressiveNumber( $scope.model )
+			if( $scope.counter>0 )
+				$scope.omocodiacolor='orange'
+			else 
+				$scope.omocodiacolor='green'
+		}
+
+		setup()
+	}]
+
+	return {
+	restrict: 'ACME',
+	replace: 'true', 
+
+		templateUrl: 'cf.html',
+
+		scope:
+		{
+			model: '@',      	
+			color: '@'
+			,counter:'@'
+		}
+
+		,controller: controller
+	};
+
+})
+
+
+
+
+
+
+app.controller('CtrlA', function($scope)
+{
+});
+
+
+
+
+</script>
+</head>
+
+<body ng-app="app" >
+<div ng-controller="CtrlA">
+
+<pre>
+Custom directive with autocheck fiscal code, and multyplicity of code called "omocodia"
+Stricly the Agenzia Entrate is the authority that could check the data inside the code,
+and it provides a tool (behind captha) to validate the fiscal code.
+https://telematici.agenziaentrate.gov.it/VerificaCF/Scegli.do?parameter=verificaCf
+
+according to the tax bureau the nations today are Z001 a Z907, 
+this directive validate aggressively so a nation Z940 is considered not valid.
+the drawback is that shoud be keeped aligned to the list of nations.
+http://www.agenziaentrate.gov.it/wps/content/Nsilib/Nsi/Strumenti/Codici+attivita+e+tributo/Codici+territorio/Comuni+italia+esteri/
+
+the Agenzia delle Entrate when two or more codes point to the same string beacuse of its data
+change the code progressively replacing number with letter, because there are 7 letter,
+and each one could be replaced or not, the maximum multiplicity of the same code is 128!.
+
+some nice descriptions of this hash function (in italian):
+https://it.wikipedia.org/wiki/Codice_fiscale#Omocodie
+http://www.paginainizio.com/service/strutturacodicefiscale.htm
+http://www.dotnethell.it/articles/CalcoloCodiceFiscale.aspx
+</pre>
+<hr>
+
+<div data-italian-fiscal-code model="MLLSNT82P65Z404U"></div>
+<div data-italian-fiscal-code ></div>
+<br>
+
+<div data-italian-fiscal-code model="MRTMTT25Dp9F205Z"></div>
+<div data-italian-fiscal-code model="MRTMTT25D09F205Z"></div>
+
+
+</div>
+
+</body>
+</html>
