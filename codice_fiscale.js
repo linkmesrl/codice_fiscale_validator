@@ -2,9 +2,6 @@
 
 var REGEX_CODICEFISCALE =/^([A-Za-z]{6}[0-9lmnpqrstuvLMNPQRSTUV]{2}[abcdehlmprstABCDEHLMPRST]{1}[0-9lmnpqrstuvLMNPQRSTUV]{2}[A-Za-z]{1}[0-9lmnpqrstuvLMNPQRSTUV]{3}[A-Za-z]{1})|([0-9]{11})$/;
 
-//var CHR_WOMEN = 'F';
-//var CHR_MEN = 'M';
-
 var listDecOmocodia = {'A':'!','B':'!','C':'!','D':'!','E':'!','F':'!','G':'!','H':'!','I':'!','J':'!','K':'!','L':'0','M':'1','N':'2','O':'!','P':'3','Q':'4','R':'5','S':'6','T':'7','U':'8','V':'9','W':'!','X':'!','Y':'!','Z':'!'};
 
 var listSostOmocodia = [6,7,9,10,12,13,14];
@@ -15,36 +12,29 @@ var listOddChar = {'0':1,'1':0,'2':5,'3':7,'4':9,'5':13,'6':15,'7':17,'8':19,'9'
 
 var listCtrlCode = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
 
-//var listDecMonth = {'A':'01','B':'02','C':'03','D':'04','E':'05','H':'06','L':'07','M':'08','P':'09','R':'10','S':'11','T':'12'};
-
 var listError = { 0 : 'Empty code', 1 : 'Len error', 2 : 'Code with wrong char', 3 : 'Code with wrong char in omocodia', 4 : 'Wrong code'};
 
 module.exports = function checkCf(codiceFiscale){
 
 
     if(!codiceFiscale){
-
         throw new Error(listError[0]);
     }
 
     if(codiceFiscale.length !== 16){
-
         throw new Error(listError[1]);
     }
 
     if(! codiceFiscale.match(REGEX_CODICEFISCALE) ){
-
         throw new Error(listError[2]);
     }
 
     var cfCharList = codiceFiscale.toUpperCase().split('');
 
-    listSostOmocodia.forEach( function(omocodiaIndex){
-
+    listSostOmocodia.forEach(function(omocodiaIndex){
         var charAtIndex = cfCharList[omocodiaIndex];
 
         if ( isNaN(charAtIndex)  && listDecOmocodia[charAtIndex] ==='!'){
-
             throw new Error(listError[3]);
         }
     });
@@ -54,7 +44,6 @@ module.exports = function checkCf(codiceFiscale){
     var dispari = listOddChar[cfCharList[14]];
 
     for(var i=0; i<13; i+=2){
-
         dispari += listOddChar[cfCharList[i]];
         pari += listEvenChar[cfCharList[i+1]];
     }
@@ -62,7 +51,6 @@ module.exports = function checkCf(codiceFiscale){
     var checksum = listCtrlCode[ (pari+dispari) % 26 ];
 
     if( checksum !== cfCharList[15] ){
-
         throw new Error(listError[4]);
     }
 
